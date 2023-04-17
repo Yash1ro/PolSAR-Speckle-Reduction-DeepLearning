@@ -1,37 +1,36 @@
-import h5py
+import scipy.io
 import numpy as np
-from skimage import exposure
-from osgeo import gdal
+import matplotlib.pyplot as plt
+import h5py
 
-# 读取HDF5文件中的数据
-with h5py.File('path/to/polSARpro_output.h5', 'r') as f:
-    sar_data = f['ParisExperimentT']
+with h5py.File('../data/oriData.mat', 'r') as f:
+    paris_t = f['ParisExperimentT'][()]
+    sanfran_t = f['SanFranExperimentT'][()]
 
-# 提取四个极化通道的数据
-hh = sar_data['HH']
-hv = sar_data['HV']
-vh = sar_data['VH']
-vv = sar_data['VV']
+# 计算Pauli分解矩阵
+pauli_mat = np.zeros((3, 3), dtype=np.complex64)
+pauli_mat[0, 1] = pauli_mat[1, 0] = 1
+pauli_mat[0, 2] = pauli_mat[2, 0] = 1j
+pauli_mat[1, 2] = pauli_mat[2, 1] = -1j
 
-# 计算Pauli合成图像的三个通道
-red = hh - vv
-green = 2 * hv
-blue = hh + vv
+# 计算Pauli分解结果
+paris_pauli = np.zeros_like(paris_t)
+sanfran_pauli = np.zeros_like(sanfran_t)
+for i in range(paris_t.shape[0]):
+    for j in range(paris_t.shape[1]):
+        pauli_vec = np.dot(pauli_mat, np.dot(paris_t[i, j], pauli_mat.T.conj()))
+        paris_pauli[i, j] = pauli_vec
+for i in range(sanfran_t.shape[0]):
+    for j in range(sanfran_t.shape[1]):
+        pauli_vec = np.dot(pauli_mat, np.dot(sanfran_t[i, j], pauli_mat.T.conj()))
+        sanfran_pauli[i, j] = pauli_vec
 
-# 归一化和线性拉伸
-red = exposure.rescale_intensity(red, out_range=(0, 255))
-green = exposure.rescale_intensity(green, out_range=(0, 255))
-blue = exposure.rescale_intensity(blue, out_range=(0, 255))
+# 取模计算强度
+paris_intensity = np.abs(paris_pauli)**2
+sanfran_intensity = np.abs(sanfran_pauli)**2
 
-# 合并三个通道，生成RGB图像
-rgb = np.dstack((red, green, blue))
-
-# 保存为TIF或其他支持的图像格式
-output_path = 'path/to/pauli-composite.tif'
-driver = gdal.GetDriverByName('GTiff')
-ds_out = driver.Create(output_path, hh.shape[1], hh.shape[0], 3, gdal.GDT_Byte)
-ds_out.SetGeoTransform((0, 1, 0, 0, 0, -1))  # 这里假设图像的地理坐标为(0, 0)，像素大小为1，图像上下翻转
-for i in range(3):
-    ds_out.GetRasterBand(i+1).WriteArray(rgb[:,:,i])
-ds_out.FlushCache()
-ds_out = None
+# 绘制Pauli图
+plt.figure()
+plt.imshow(np.hstack([paris_intensity, sanfran_intensity]), cmap='gray')
+plt.axis('off')
+plt.show()
