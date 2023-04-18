@@ -1,36 +1,44 @@
-import scipy.io
 import numpy as np
-import matplotlib.pyplot as plt
 import h5py
+import matplotlib.pyplot as plt
+import scipy.linalg
 
+# 读取HDF5文件
 with h5py.File('../data/oriData.mat', 'r') as f:
-    paris_t = f['ParisExperimentT'][()]
-    sanfran_t = f['SanFranExperimentT'][()]
+    data_paris = f['ParisExperimentT'][:]
+    data_sanfran = f['SanFranExperimentT'][:]
 
-# 计算Pauli分解矩阵
-pauli_mat = np.zeros((3, 3), dtype=np.complex64)
-pauli_mat[0, 1] = pauli_mat[1, 0] = 1
-pauli_mat[0, 2] = pauli_mat[2, 0] = 1j
-pauli_mat[1, 2] = pauli_mat[2, 1] = -1j
+# 对数据进行T矩阵分解
+T_paris = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 0]])
+T_sanfran = np.array([[1, 0, 0], [0, -1, 0], [0, 0, 0]])
+L_paris, U_paris, P_paris = scipy.linalg.lu(T_paris)
+L_sanfran, U_sanfran, P_sanfran = scipy.linalg.lu(T_sanfran)
+T_inv_paris = scipy.linalg.solve(U_paris, scipy.linalg.solve(L_paris, P_paris.T))
+T_inv_sanfran = scipy.linalg.solve(U_sanfran, scipy.linalg.solve(L_sanfran, P_sanfran.T))
+S_paris = np.dot(np.dot(T_inv_paris, data_paris), T_inv_paris.conj().T)
+S_sanfran = np.dot(np.dot(T_inv_sanfran, data_sanfran), T_inv_sanfran.conj().T)
 
-# 计算Pauli分解结果
-paris_pauli = np.zeros_like(paris_t)
-sanfran_pauli = np.zeros_like(sanfran_t)
-for i in range(paris_t.shape[0]):
-    for j in range(paris_t.shape[1]):
-        pauli_vec = np.dot(pauli_mat, np.dot(paris_t[i, j], pauli_mat.T.conj()))
-        paris_pauli[i, j] = pauli_vec
-for i in range(sanfran_t.shape[0]):
-    for j in range(sanfran_t.shape[1]):
-        pauli_vec = np.dot(pauli_mat, np.dot(sanfran_t[i, j], pauli_mat.T.conj()))
-        sanfran_pauli[i, j] = pauli_vec
+# 生成Pauli图像
+HH_paris = S_paris[0, 0, :, :]
+HV_paris = S_paris[0, 1, :, :]
+VV_paris = S_paris[1, 1, :, :]
+fig, axs = plt.subplots(nrows=1, ncols=3, figsize=(12, 4))
+axs[0].imshow(np.abs(HH_paris), cmap='gray')
+axs[0].set_title('HH')
+axs[1].imshow(np.abs(VV_paris), cmap='gray')
+axs[1].set_title('VV')
+axs[2].imshow(np.abs(HV_paris), cmap='gray')
+axs[2].set_title('HV')
+plt.show()
 
-# 取模计算强度
-paris_intensity = np.abs(paris_pauli)**2
-sanfran_intensity = np.abs(sanfran_pauli)**2
-
-# 绘制Pauli图
-plt.figure()
-plt.imshow(np.hstack([paris_intensity, sanfran_intensity]), cmap='gray')
-plt.axis('off')
+HH_sanfran = S_sanfran[0, 0, :, :]
+HV_sanfran = S_sanfran[0, 1, :, :]
+VV_sanfran = S_sanfran[1, 1, :, :]
+fig, axs = plt.subplots(nrows=1, ncols=3, figsize=(12, 4))
+axs[0].imshow(np.abs(HH_sanfran), cmap='gray')
+axs[0].set_title('HH')
+axs[1].imshow(np.abs(VV_sanfran), cmap='gray')
+axs[1].set_title('VV')
+axs[2].imshow(np.abs(HV_sanfran), cmap='gray')
+axs[2].set_title('HV')
 plt.show()
