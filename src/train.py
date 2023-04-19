@@ -16,8 +16,8 @@ def parse_args():
     parser = ArgumentParser(description='PyTorch implementation of Noise2Noise from Lehtinen et al. (2018)')
 
     # Data parameters
-    parser.add_argument('-t', '--train-dir', help='training set path', default='./../data/train')
-    parser.add_argument('-v', '--valid-dir', help='test set path', default='./../data/val')
+    parser.add_argument('-t', '--train-dir', help='training set path', default='./../data/train_Pauli')
+    parser.add_argument('-v', '--valid-dir', help='test set path', default='./../data/val_Pauli')
     parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='./../ckpts')
     parser.add_argument('--ckpt-overwrite', help='overwrite model checkpoint on save', action='store_true')
     parser.add_argument('--report-interval', help='batch report interval', default=100, type=int)
