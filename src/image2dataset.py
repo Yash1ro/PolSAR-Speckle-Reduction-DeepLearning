@@ -9,7 +9,7 @@ if not (os.path.exists("../data/val_Pauli")):
     os.mkdir("../data/val_Pauli")
 if not (os.path.exists("../data/test_Pauli")):
     os.mkdir("../data/test_Pauli")
-if not (os.path.exists("..data/Pauli_data")):
+if not (os.path.exists("../data/Pauli_data")):
     os.mkdir("../data/Pauli_data")
 
 
