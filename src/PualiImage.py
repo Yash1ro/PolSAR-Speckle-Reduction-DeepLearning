@@ -1,6 +1,7 @@
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
+import cv2
 import torch
 
 # 读取HDF5格式文件
@@ -20,4 +21,6 @@ with h5py.File('../data/PauliImage.mat', 'r') as f:
     ax1.set_title('Paris dataset')
     ax2.imshow(sanfran_data.T)
     ax2.set_title('San Francisco dataset')
+    plt.imsave('Paris_experiment.jpg', paris_data.T)
+    plt.imsave('SanFran_experiment.jpg', sanfran_data.T)
     plt.show()
