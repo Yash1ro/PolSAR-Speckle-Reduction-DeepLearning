@@ -8,10 +8,10 @@ def get_imlist(path):
 
 
 def getData(src_path):
-    dest_dir = '../data/train_Pauli'  # 这个文件夹需要提前建好
+    dest_dir = '../data/test_Pauli'  # 这个文件夹需要提前建好
     img_list = get_imlist(src_path)
     random.shuffle(img_list)
-    le = int(len(img_list) * 0.8)  # 这个可以修改划分比例
+    le = int(len(img_list) * 0.05)  # 这个可以修改划分比例
     for f in img_list[le:]:
         shutil.move(f, dest_dir)
 
