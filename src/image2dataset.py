@@ -48,31 +48,6 @@ if len(os.listdir("../data/Pauli_data")) == 0:
             print("写入数据集，类型{}，序号：{}".format(i, k))
 
 
-# 划分训练集
-    # for k in range(1000):
-    #     img_crop = trans_rancrop(img_totensor)
-    #     toPIL = transforms.ToPILImage()  # 这个函数可以将张量转为PIL图片，由小数转为0-255之间的像素值
-    #     img_dataset = toPIL(img_crop)
-    #     img_dataset.save("../data/train_Pauli/{}_{}.jpg".format(i, k))
-    #     writer.add_image("train_Pauli-{}".format(k), img_crop, k)
-
-# 划分验证集
-    # for k in range(200):
-    #     img_crop = trans_rancrop(img_totensor)
-    #     toPIL = transforms.ToPILImage()  # 这个函数可以将张量转为PIL图片，由小数转为0-255之间的像素值
-    #     img_dataset = toPIL(img_crop)
-    #     img_dataset.save("../data/val_Pauli/{}_{}.jpg".format(i, k))
-    #     writer.add_image("val_Pauli-{}".format(k), img_crop, k)
-
-# 划分测试集
-    # for k in range(10):
-    #     img_crop = trans_rancrop(img_totensor)
-    #     toPIL = transforms.ToPILImage()  # 这个函数可以将张量转为PIL图片，由小数转为0-255之间的像素值
-    #     img_dataset = toPIL(img_crop)
-    #     img_dataset.save("../data/test_Pauli/{}_{}.jpg".format(i, k))
-    #     writer.add_image("test_Pauli-{}".format(k), img_crop, k)
-
-
 
 
 
