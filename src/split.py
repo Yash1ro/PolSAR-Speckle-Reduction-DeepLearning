@@ -50,7 +50,7 @@ def getData(src_path):
     print("Testing set has been done !")
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     del_files2('../data/train_Pauli')
     del_files2('../data/val_Pauli')
     del_files2('../data/test_Pauli')
