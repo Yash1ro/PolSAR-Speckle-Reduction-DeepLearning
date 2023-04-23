@@ -1,6 +1,7 @@
 import os
 import random
 import shutil
+from tqdm import tqdm
 
 
 def get_imlist(path):
@@ -30,23 +31,27 @@ def getData(src_path):
     img_list = get_imlist(src_path)
     random.shuffle(img_list)
     le = int(len(img_list_origin) * 0.7)  # 这个可以修改划分比例
-    for f in img_list[:le]:
+    for f in tqdm(img_list[:le]):
         shutil.move(f, dest_dir_train)
+    print("Training set has been done !")
 
     img_list = get_imlist(src_path)
     random.shuffle(img_list)
     le = int(len(img_list_origin) * 0.2)  # 这个可以修改划分比例
     for f in img_list[:le]:
         shutil.move(f, dest_dir_val)
+    print("Valuating set has been done !")
 
     img_list = get_imlist(src_path)
     random.shuffle(img_list)
     le = int(len(img_list_origin) * 0.1)  # 这个可以修改划分比例
     for f in img_list[:le]:
         shutil.move(f, dest_dir_test)
+    print("Testing set has been done !")
 
 
-del_files2('../data/train_Pauli')
-del_files2('../data/val_Pauli')
-del_files2('../data/test_Pauli')
-getData('../data/Pauli_data')
+if __name__ == "main":
+    del_files2('../data/train_Pauli')
+    del_files2('../data/val_Pauli')
+    del_files2('../data/test_Pauli')
+    getData('../data/Pauli_data')
