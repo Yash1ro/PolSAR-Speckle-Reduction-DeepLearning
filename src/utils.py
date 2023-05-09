@@ -19,7 +19,7 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
-
+import myLogs
 
 def clear_line():
     """Clears line from any characters."""

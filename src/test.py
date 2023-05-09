@@ -24,7 +24,7 @@ def parse_args():
 
     # Corruption parameters
     parser.add_argument('-n', '--noise-type', help='noise type',
-        choices=['gaussian', 'poisson', 'text', 'mc'], default='gaussian', type=str)
+        choices=['speckle', 'gaussian', 'poisson', 'text', 'mc'], default='gaussian', type=str)
     parser.add_argument('-v', '--noise-param', help='noise parameter (e.g. sigma for gaussian)', default=50, type=float)
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
     parser.add_argument('-c', '--crop-size', help='image crop size', default=256, type=int)

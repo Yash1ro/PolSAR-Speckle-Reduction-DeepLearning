@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 
 def get_imlist(path):
-    return [os.path.join(path, f) for f in os.listdir(path) if f.endswith('.jpg')]
+    return [os.path.join(path, f) for f in os.listdir(path) if f.endswith('.png')]
 
 
 # 删除文件夹
@@ -23,35 +23,55 @@ def del_files2(dir_path):
 
 
 def getData(src_path):
-    dest_dir_train = '../data/train_Pauli'  # 这个文件夹需要提前建好
-    dest_dir_val = '../data/val_Pauli'
-    dest_dir_test = '../data/test_Pauli'
+    dest_dir_train_1 = '../data/train_SAR'  # 这个文件夹需要提前建好
+    dest_dir_val_1 = '../data/val_SAR'
+    dest_dir_test_1 = '../data/test_SAR'
 
-    img_list_origin = get_imlist(src_path)
-    img_list = get_imlist(src_path)
-    random.shuffle(img_list)
-    le = int(len(img_list_origin) * 0.7)  # 这个可以修改划分比例
-    for f in tqdm(img_list[:le]):
-        shutil.move(f, dest_dir_train)
-    print("Training set has been done !")
+    dest_dir_train_2 = '../data/train_Pauli'  # 这个文件夹需要提前建好
+    dest_dir_val_2 = '../data/val_Pauli'
+    dest_dir_test_2 = '../data/test_Pauli'
 
-    img_list = get_imlist(src_path)
-    random.shuffle(img_list)
-    le = int(len(img_list_origin) * 0.2)  # 这个可以修改划分比例
-    for f in tqdm(img_list[:le]):
-        shutil.move(f, dest_dir_val)
-    print("Valuating set has been done !")
+    if 'SAR' in src_path:
+        img_list_origin = get_imlist(src_path)
+        img_list = get_imlist(src_path)
+        random.shuffle(img_list)
+        le = int(len(img_list_origin) * 0.7)  # 这个可以修改划分比例
+        for f in tqdm(img_list[:le]):
+            shutil.move(f, dest_dir_train_1)
+        print("Training set has been done !")
 
-    img_list = get_imlist(src_path)
-    random.shuffle(img_list)
-    le = int(len(img_list_origin) * 0.1)  # 这个可以修改划分比例
-    for f in tqdm(img_list[:le]):
-        shutil.move(f, dest_dir_test)
-    print("Testing set has been done !")
+        img_list = get_imlist(src_path)
+        random.shuffle(img_list)
+        le = int(len(img_list_origin) * 0.2)  # 这个可以修改划分比例
+        for f in tqdm(img_list[:le]):
+            shutil.move(f, dest_dir_val_1)
+        print("Valuating set has been done !")
 
+        img_list = get_imlist(src_path)
+        random.shuffle(img_list)
+        le = int(len(img_list_origin) * 0.1)  # 这个可以修改划分比例
+        for f in tqdm(img_list[:le]):
+            shutil.move(f, dest_dir_test_1)
+        print("Testing set has been done !")
+    elif 'Pauli' in src_path:
+        img_list_origin = get_imlist(src_path)
+        img_list = get_imlist(src_path)
+        random.shuffle(img_list)
+        le = int(len(img_list_origin) * 0.7)  # 这个可以修改划分比例
+        for f in tqdm(img_list[:le]):
+            shutil.move(f, dest_dir_train_2)
+        print("Training set has been done !")
 
-if __name__ == "__main__":
-    del_files2('../data/train_Pauli')
-    del_files2('../data/val_Pauli')
-    del_files2('../data/test_Pauli')
-    getData('../data/Pauli_data')
+        img_list = get_imlist(src_path)
+        random.shuffle(img_list)
+        le = int(len(img_list_origin) * 0.2)  # 这个可以修改划分比例
+        for f in tqdm(img_list[:le]):
+            shutil.move(f, dest_dir_val_2)
+        print("Valuating set has been done !")
+
+        img_list = get_imlist(src_path)
+        random.shuffle(img_list)
+        le = int(len(img_list_origin) * 0.1)  # 这个可以修改划分比例
+        for f in tqdm(img_list[:le]):
+            shutil.move(f, dest_dir_test_2)
+        print("Testing set has been done !")

@@ -3,6 +3,7 @@
 
 import torch
 import torch.nn as nn
+import torchvision
 from torch.optim import Adam, lr_scheduler
 
 from unet import UNet
@@ -10,7 +11,7 @@ from utils import *
 
 import os
 import json
-
+import myLogs
 
 class Noise2Noise(object):
     """Implementation of Noise2Noise from Lehtinen et al. (2018)."""
@@ -283,7 +284,6 @@ class Noise2Noise(object):
             # Epoch end, save and reset tracker
             self._on_epoch_end(stats, train_loss_meter.avg, epoch, epoch_start, valid_loader)
             train_loss_meter.reset()
-
         train_elapsed = time_elapsed_since(train_start)[0]
         print('Training done! Total elapsed time: {}\n'.format(train_elapsed))
 

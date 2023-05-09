@@ -15,12 +15,16 @@ import random
 from string import ascii_letters
 from PIL import Image, ImageFont, ImageDraw
 import OpenEXR
+from scipy import signal
 
 from matplotlib import rcParams
+
 rcParams['font.family'] = 'serif'
 import matplotlib
+
 matplotlib.use('agg')
-import matplotlib.pyplot as plt
+import skimage
+from skimage import util
 
 
 def load_dataset(root_dir, redux, params, shuffled=False, single=False):
@@ -30,12 +34,8 @@ def load_dataset(root_dir, redux, params, shuffled=False, single=False):
     noise = (params.noise_type, params.noise_param)
 
     # Instantiate appropriate dataset class
-    if params.noise_type == 'mc':
-        dataset = MonteCarloDataset(root_dir, redux, params.crop_size,
-            clean_targets=params.clean_targets)
-    else:
-        dataset = NoisyDataset(root_dir, redux, params.crop_size,
-            clean_targets=params.clean_targets, noise_dist=noise, seed=params.seed)
+    dataset = NoisyDataset(root_dir, redux, params.crop_size,
+                           clean_targets=params.clean_targets, noise_dist=noise, seed=params.seed)
 
     # Use batch size of 1, if requested (e.g. test set)
     if single:
@@ -80,12 +80,10 @@ class AbstractDataset(Dataset):
 
         return cropped_imgs
 
-
     def __getitem__(self, index):
         """Retrieves image from data folder."""
 
         raise NotImplementedError('Abstract method not implemented!')
-
 
     def __len__(self):
         """Returns length of dataset."""
@@ -97,7 +95,7 @@ class NoisyDataset(AbstractDataset):
     """Class for injecting random noise into dataset."""
 
     def __init__(self, root_dir, redux, crop_size, clean_targets=False,
-        noise_dist=('gaussian', 50.), seed=None):
+                 noise_dist=('gaussian', 50.), seed=None):
         """Initializes noisy image dataset."""
 
         super(NoisyDataset, self).__init__(root_dir, redux, crop_size, clean_targets)
@@ -113,7 +111,6 @@ class NoisyDataset(AbstractDataset):
         if self.seed:
             np.random.seed(self.seed)
 
-
     def _add_noise(self, img):
         """Adds Gaussian or Poisson noise to image."""
 
@@ -128,6 +125,18 @@ class NoisyDataset(AbstractDataset):
             noise = np.random.poisson(img)
             noise_img = img + noise
             noise_img = 255 * (noise_img / np.amax(noise_img))
+        elif self.noise_type == 'speckle':
+            img = np.array(img)
+            noise_gs_img = util.random_noise(img, mode='speckle')
+            noise_gs_img = noise_gs_img * 255
+            noise_img = noise_gs_img.astype(np.int64)
+        elif self.noise_type == 's&p':
+            img = np.array(img)
+            noise_gs_img = util.random_noise(img, mode='s&p')
+            noise_gs_img = noise_gs_img * 255
+            noise_img = noise_gs_img.astype(np.int64)
+
+
 
         # Normal distribution (default)
         else:
@@ -142,7 +151,6 @@ class NoisyDataset(AbstractDataset):
 
         noise_img = np.clip(noise_img, 0, 255).astype(np.uint8)
         return Image.fromarray(noise_img)
-
 
     def _add_text_overlay(self, img):
         """Adds text overlay to images."""
@@ -171,6 +179,7 @@ class NoisyDataset(AbstractDataset):
             max_occupancy = self.noise_param
         else:
             max_occupancy = np.random.uniform(0, self.noise_param)
+
         def get_occupancy(x):
             y = np.array(x, dtype=np.uint8)
             return np.sum(y) / y.size
@@ -191,24 +200,22 @@ class NoisyDataset(AbstractDataset):
 
         return text_img
 
-
     def _corrupt(self, img):
         """Corrupts images (Gaussian, Poisson, or text overlay)."""
 
-        if self.noise_type in ['gaussian', 'poisson']:
+        if self.noise_type in ['gaussian', 'poisson', 'speckle']:
             return self._add_noise(img)
         elif self.noise_type == 'text':
             return self._add_text_overlay(img)
         else:
             raise ValueError('Invalid noise type: {}'.format(self.noise_type))
 
-
     def __getitem__(self, index):
         """Retrieves image from folder and corrupts it."""
 
         # Load PIL image
         img_path = os.path.join(self.root_dir, self.imgs[index])
-        img =  Image.open(img_path).convert('RGB')
+        img = Image.open(img_path).convert('RGB')
 
         # Random square crop
         if self.crop_size != 0:
@@ -223,76 +230,5 @@ class NoisyDataset(AbstractDataset):
             target = tvF.to_tensor(img)
         else:
             target = tvF.to_tensor(self._corrupt(img))
-
-        return source, target
-
-
-class MonteCarloDataset(AbstractDataset):
-    """Class for dealing with Monte Carlo rendered images."""
-
-    def __init__(self, root_dir, redux, crop_size,
-        hdr_buffers=False, hdr_targets=True, clean_targets=False):
-        """Initializes Monte Carlo image dataset."""
-
-        super(MonteCarloDataset, self).__init__(root_dir, redux, crop_size, clean_targets)
-
-        # Rendered images directories
-        self.root_dir = root_dir
-        self.imgs = os.listdir(os.path.join(root_dir, 'render'))
-        self.albedos = os.listdir(os.path.join(root_dir, 'albedo'))
-        self.normals = os.listdir(os.path.join(root_dir, 'normal'))
-
-        if redux:
-            self.imgs = self.imgs[:redux]
-            self.albedos = self.albedos[:redux]
-            self.normals = self.normals[:redux]
-
-        # Read reference image (converged target)
-        ref_path = os.path.join(root_dir, 'reference.png')
-        self.reference = Image.open(ref_path).convert('RGB')
-
-        # High dynamic range images
-        self.hdr_buffers = hdr_buffers
-        self.hdr_targets = hdr_targets
-
-
-    def __getitem__(self, index):
-        """Retrieves image from folder and corrupts it."""
-
-        # Use converged image, if requested
-        if self.clean_targets:
-            target = self.reference
-        else:
-            target_fname = self.imgs[index].replace('render', 'target')
-            file_ext = '.exr' if self.hdr_targets else '.png'
-            target_fname = os.path.splitext(target_fname)[0] + file_ext
-            target_path = os.path.join(self.root_dir, 'target', target_fname)
-            if self.hdr_targets:
-                target = tvF.to_pil_image(load_hdr_as_tensor(target_path))
-            else:
-                target = Image.open(target_path).convert('RGB')
-
-        # Get buffers
-        render_path = os.path.join(self.root_dir, 'render', self.imgs[index])
-        albedo_path = os.path.join(self.root_dir, 'albedo', self.albedos[index])
-        normal_path =  os.path.join(self.root_dir, 'normal', self.normals[index])
-
-        if self.hdr_buffers:
-            render = tvF.to_pil_image(load_hdr_as_tensor(render_path))
-            albedo = tvF.to_pil_image(load_hdr_as_tensor(albedo_path))
-            normal = tvF.to_pil_image(load_hdr_as_tensor(normal_path))
-        else:
-            render = Image.open(render_path).convert('RGB')
-            albedo = Image.open(albedo_path).convert('RGB')
-            normal = Image.open(normal_path).convert('RGB')
-
-        # Crop
-        if self.crop_size != 0:
-            buffers = [render, albedo, normal, target]
-            buffers = [tvF.to_tensor(b) for b in self._random_crop(buffers)]
-
-        # Stack buffers to create input volume
-        source = torch.cat(buffers[:3], dim=0)
-        target = buffers[3]
 
         return source, target
