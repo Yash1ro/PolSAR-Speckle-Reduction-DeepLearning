@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import cv2
 import torch
 import torch.nn.functional as F
 import torchvision.transforms.functional as tvF
@@ -135,6 +135,16 @@ class NoisyDataset(AbstractDataset):
             noise_gs_img = util.random_noise(img, mode='s&p')
             noise_gs_img = noise_gs_img * 255
             noise_img = noise_gs_img.astype(np.int64)
+        elif self.noise_type == "gamma-l1":
+            img_np = np.array(img)
+            noise = np.random.gamma(shape=5, scale=20.0, size=img_np.shape)
+            noise_img = img + noise
+            noise_img = 255 * (noise_img / np.amax(noise_img))
+        elif self.noise_type == "gamma-l2":
+            img_np = np.array(img)
+            noise = np.random.gamma(shape=5, scale=20.0, size=img_np.shape)
+            noise_img = img + noise
+            noise_img = 255 * (noise_img / np.amax(noise_img))
 
 
 
@@ -203,10 +213,12 @@ class NoisyDataset(AbstractDataset):
     def _corrupt(self, img):
         """Corrupts images (Gaussian, Poisson, or text overlay)."""
 
-        if self.noise_type in ['gaussian', 'poisson', 'speckle']:
+        if self.noise_type in ['gaussian', 'poisson', 'speckle', 'gamma-l1', 's&p', 'gamma-L', 'gamma-l2']:
             return self._add_noise(img)
         elif self.noise_type == 'text':
             return self._add_text_overlay(img)
+        elif self.noise_type == "none":
+            return img
         else:
             raise ValueError('Invalid noise type: {}'.format(self.noise_type))
 
@@ -215,7 +227,11 @@ class NoisyDataset(AbstractDataset):
 
         # Load PIL image
         img_path = os.path.join(self.root_dir, self.imgs[index])
-        img = Image.open(img_path).convert('RGB')
+        if self.noise_type == 'gamma-L':
+            img = Image.open(img_path).convert('L')
+        else:
+            img = Image.open(img_path).convert('RGB')
+        # img = cv2.imread(img_path)
 
         # Random square crop
         if self.crop_size != 0:
