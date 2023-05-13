@@ -35,21 +35,21 @@ def getData(src_path):
         img_list_origin = get_imlist(src_path)
         img_list = get_imlist(src_path)
         random.shuffle(img_list)
-        le = int(len(img_list_origin) * 0.7)  # 这个可以修改划分比例
+        le = int(len(img_list_origin) * 0.8)  # 这个可以修改划分比例
         for f in tqdm(img_list[:le]):
             shutil.move(f, dest_dir_train_1)
         print("Training set has been done !")
 
         img_list = get_imlist(src_path)
         random.shuffle(img_list)
-        le = int(len(img_list_origin) * 0.2)  # 这个可以修改划分比例
+        le = int(len(img_list_origin) * 0.19)  # 这个可以修改划分比例
         for f in tqdm(img_list[:le]):
             shutil.move(f, dest_dir_val_1)
         print("Valuating set has been done !")
 
         img_list = get_imlist(src_path)
         random.shuffle(img_list)
-        le = int(len(img_list_origin) * 0.1)  # 这个可以修改划分比例
+        le = int(len(img_list_origin) * 0.01)  # 这个可以修改划分比例
         for f in tqdm(img_list[:le]):
             shutil.move(f, dest_dir_test_1)
         print("Testing set has been done !")
@@ -57,21 +57,21 @@ def getData(src_path):
         img_list_origin = get_imlist(src_path)
         img_list = get_imlist(src_path)
         random.shuffle(img_list)
-        le = int(len(img_list_origin) * 0.7)  # 这个可以修改划分比例
+        le = int(len(img_list_origin) * 0.8)  # 这个可以修改划分比例
         for f in tqdm(img_list[:le]):
             shutil.move(f, dest_dir_train_2)
         print("Training set has been done !")
 
         img_list = get_imlist(src_path)
         random.shuffle(img_list)
-        le = int(len(img_list_origin) * 0.2)  # 这个可以修改划分比例
+        le = int(len(img_list_origin) * 0.19)  # 这个可以修改划分比例
         for f in tqdm(img_list[:le]):
             shutil.move(f, dest_dir_val_2)
         print("Valuating set has been done !")
 
         img_list = get_imlist(src_path)
         random.shuffle(img_list)
-        le = int(len(img_list_origin) * 0.1)  # 这个可以修改划分比例
+        le = int(len(img_list_origin) * 0.01)  # 这个可以修改划分比例
         for f in tqdm(img_list[:le]):
             shutil.move(f, dest_dir_test_2)
         print("Testing set has been done !")

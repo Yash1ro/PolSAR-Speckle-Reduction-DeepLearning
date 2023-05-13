@@ -27,7 +27,7 @@ class Noise2Noise(object):
     def _compile(self):
         """Compiles model (architecture, loss function, optimizers, etc.)."""
 
-        print('Noise2Noise: Learning Image Restoration without Clean Data (Lethinen et al., 2018)')
+        print('Lewis-Gu-S2S')
 
         # Model (3x3=9 channels for Monte Carlo since it uses 3 HDR buffers)
         if self.p.noise_type == 'mc':
@@ -46,7 +46,9 @@ class Noise2Noise(object):
 
             # Learning rate adjustment
             self.scheduler = lr_scheduler.ReduceLROnPlateau(self.optim,
-                patience=self.p.nb_epochs/4, factor=0.5, verbose=True)
+                patience=10, factor=0.5, verbose=True)
+            self.show_rate = self.optim.state_dict()['param_groups'][0]['lr']
+
 
             # Loss function
             if self.p.loss == 'hdr':
@@ -133,6 +135,9 @@ class Noise2Noise(object):
 
         # Decrease learning rate if plateau
         self.scheduler.step(valid_loss)
+
+        print("Learning rate:{}".format(self.show_rate))
+
 
         # Save checkpoint
         stats['train_loss'].append(train_loss)

@@ -120,9 +120,14 @@ def create_montage(img_name, noise_type, save_path, source_t, denoised_t, clean_
     fig.canvas.manager.set_window_title(img_name.capitalize()[:-4])
 
     # Bring tensors to CPU
-    source_t = source_t.cpu().narrow(0, 0, 3)
-    denoised_t = denoised_t.cpu()
-    clean_t = clean_t.cpu()
+    if noise_type == 'gamma-L':
+        source_t = source_t.cpu().narrow(0, 0, 1)
+        denoised_t = denoised_t.cpu()
+        clean_t = clean_t.cpu()
+    else:
+        source_t = source_t.cpu().narrow(0, 0, 3)
+        denoised_t = denoised_t.cpu()
+        clean_t = clean_t.cpu()
     
     source = tvF.to_pil_image(source_t)
     denoised = tvF.to_pil_image(torch.clamp(denoised_t, 0, 1))
