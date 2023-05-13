@@ -21,8 +21,8 @@ def parse_args():
     parser.add_argument('--ckpt-save-path', help='checkpoint save path', default='../ckpts')
     parser.add_argument('--ckpt-overwrite', help='overwrite model checkpoint on save', default=True, action='store_true')
     parser.add_argument('--report-interval', help='batch report interval', default=50, type=int)
-    parser.add_argument('-ts', '--train-size', help='size of train dataset', type=int, default=1200)
-    parser.add_argument('-vs', '--valid-size', help='size of valid dataset', type=int, default=200)
+    parser.add_argument('-ts', '--train-size', help='size of train dataset', type=int, default=400)
+    parser.add_argument('-vs', '--valid-size', help='size of valid dataset', type=int, default=100)
 
     # Training hyperparameters
     parser.add_argument('-lr', '--learning-rate', help='learning rate', default=0.0001, type=float)
@@ -35,7 +35,7 @@ def parse_args():
 
     # Corruption parameters
     parser.add_argument('-n', '--noise-type', help='noise type',
-        choices=['gamma-L', 'sp', 'gamma-l1', "none", 'gamma-l2', 'speckle', 'gaussian', 'poisson', 'text', 'mc'], default='gamma', type=str)
+        choices=['SAR', 'gamma-L', 'sp', 'gamma-l1', "none", 'gamma-l2', 'speckle', 'gaussian', 'poisson', 'text', 'mc'], default='SAR', type=str)
     parser.add_argument('-p', '--noise-param', help='noise parameter (e.g. std for gaussian)', type=float)
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
     parser.add_argument('-c', '--crop-size', help='random crop size', default=64, type=int)
@@ -51,8 +51,8 @@ if __name__ == '__main__':
     params = parse_args()
 
     # Train/valid datasets
-    train_loader = load_dataset(params.train_dir, params.train_size, params, shuffled=True)
-    valid_loader = load_dataset(params.valid_dir, params.valid_size, params, shuffled=False)
+    train_loader = load_dataset(params.train_dir, params.train_size, params, shuffled=False)
+    valid_loader = load_dataset(params.valid_dir, params.valid_size, params, shuffled=True)
 
     # Initialize model and train
     n2n = Noise2Noise(params, trainable=True)

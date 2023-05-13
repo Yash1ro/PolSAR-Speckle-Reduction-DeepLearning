@@ -18,13 +18,13 @@ def parse_args():
 
     # Data parameters
     parser.add_argument('-d', '--data', help='dataset root path', default='../data/SARImage')
-    parser.add_argument('--load-ckpt', help='load model checkpoint', default='../ckpts/gamma-L/n2n-gamma-L.pt')
+    parser.add_argument('--load-ckpt', help='load model checkpoint', default='../ckpts/gamma/n2n-gamma.pt')
     parser.add_argument('--show-output', help='pop up window to display outputs', default=2, type=int)
     parser.add_argument('--cuda', help='use cuda', action='store_true', default=True)
 
     # Corruption parameters
     parser.add_argument('-n', '--noise-type', help='noise type',
-        choices=['gaussian', 'poisson', 'text', 'mc', 'gamma-l1', 'gamma-l2', 'none'], default='none', type=str)
+        choices=['SAR', 'gaussian', 'poisson', 'text', 'mc', 'gamma-l1', 'gamma-l2', 'none'], default='none', type=str)
     parser.add_argument('-v', '--noise-param', help='noise parameter (e.g. sigma for gaussian)', default=50, type=float)
     parser.add_argument('-s', '--seed', help='fix random seed', type=int)
     parser.add_argument('-c', '--crop-size', help='image crop size', default=512, type=int)

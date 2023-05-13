@@ -53,6 +53,8 @@ class AbstractDataset(Dataset):
         super(AbstractDataset, self).__init__()
 
         self.imgs = []
+        self.imgs_source = []
+        self.imgs_target = []
         self.root_dir = root_dir
         self.redux = redux
         self.crop_size = crop_size
@@ -87,8 +89,7 @@ class AbstractDataset(Dataset):
 
     def __len__(self):
         """Returns length of dataset."""
-
-        return len(self.imgs)
+        return len(self.imgs_source)
 
 
 class NoisyDataset(AbstractDataset):
@@ -100,16 +101,20 @@ class NoisyDataset(AbstractDataset):
 
         super(NoisyDataset, self).__init__(root_dir, redux, crop_size, clean_targets)
 
-        self.imgs = os.listdir(root_dir)
-        if redux:
-            self.imgs = self.imgs[:redux]
-
         # Noise parameters (max std for Gaussian, lambda for Poisson, nb of artifacts for text)
         self.noise_type = noise_dist[0]
         self.noise_param = noise_dist[1]
         self.seed = seed
         if self.seed:
             np.random.seed(self.seed)
+
+        if self.noise_type == "SAR":
+            self.imgs_source = os.listdir("../data/PolSAR_source")
+            self.imgs_target = os.listdir("../data/PolSAR_target")
+        else:
+            self.imgs = os.listdir(root_dir)
+            if redux:
+                self.imgs = self.imgs[:redux]
 
     def _add_noise(self, img):
         """Adds Gaussian or Poisson noise to image."""
@@ -222,7 +227,7 @@ class NoisyDataset(AbstractDataset):
             return self._add_noise(img)
         elif self.noise_type == 'text':
             return self._add_text_overlay(img)
-        elif self.noise_type == "none":
+        elif self.noise_type in ["none", "SAR"]:
             return img
         else:
             raise ValueError('Invalid noise type: {}'.format(self.noise_type))
@@ -231,23 +236,46 @@ class NoisyDataset(AbstractDataset):
         """Retrieves image from folder and corrupts it."""
 
         # Load PIL image
-        img_path = os.path.join(self.root_dir, self.imgs[index])
-        img = Image.open(img_path).convert('RGB')
-        # img = cv2.imread(img_path)
+        # img_path = os.path.join(self.root_dir, self.imgs[index])
+        # img = Image.open(img_path).convert('RGB')
+        #
+        # # Random square crop
+        # if self.crop_size != 0:
+        #     img = self._random_crop([img])[0]
 
-        # Random square crop
-        if self.crop_size != 0:
-            img = self._random_crop([img])[0]
+        if self.noise_type == "SAR":
+            img_sar_source = "../data/PolSAR_source"
+            img_path_source = os.path.join(img_sar_source, self.imgs_source[index])
+            img_source = Image.open(img_path_source).convert('RGB')
+            # Random square crop
+            if self.crop_size != 0:
+                img_source = self._random_crop([img_source])[0]
 
+            img_sar_target = "../data/PolSAR_target"
+            img_path_target = os.path.join(img_sar_target, self.imgs_target[index])
+            img_target = Image.open(img_path_target).convert('RGB')
+            if self.crop_size != 0:
+                img_target = self._random_crop([img_target])[0]
 
-        # Corrupt source image
-        tmp = self._corrupt(img)
-        source = tvF.to_tensor(self._corrupt(img))
+            source = tvF.to_tensor(img_source)
+            target = tvF.to_tensor(img_target)
 
-        # Corrupt target image, but not when clean targets are requested
-        if self.clean_targets:
-            target = tvF.to_tensor(img)
         else:
-            target = tvF.to_tensor(self._corrupt(img))
+            img_path = os.path.join(self.root_dir, self.imgs[index])
+            img = Image.open(img_path).convert('RGB')
+            # img = cv2.imread(img_path)
+
+            # Random square crop
+            if self.crop_size != 0:
+                img = self._random_crop([img])[0]
+            # Corrupt source image
+            tmp = self._corrupt(img)
+            source = tvF.to_tensor(self._corrupt(img))
+
+            # Corrupt target image, but not when clean targets are requested
+            if self.clean_targets:
+                target = tvF.to_tensor(img)
+            else:
+                target = tvF.to_tensor(self._corrupt(img))
 
         return source, target
