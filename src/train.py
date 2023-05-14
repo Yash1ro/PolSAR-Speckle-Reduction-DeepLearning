@@ -13,7 +13,7 @@ def parse_args():
     """Command-line argument parser for training."""
 
     # New parser
-    parser = ArgumentParser(description='PyTorch implementation of Noise2Noise from Lehtinen et al. (2018)')
+    parser = ArgumentParser(description='train parser')
 
     # Data parameters
     parser.add_argument('-t', '--train-dir', help='training set path', default='../data/train')

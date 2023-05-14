@@ -14,11 +14,11 @@ def parse_args():
     """Command-line argument parser for testing."""
 
     # New parser
-    parser = ArgumentParser(description='PyTorch implementation of Noise2Noise from Lehtinen et al. (2018)')
+    parser = ArgumentParser(description='test parser')
 
     # Data parameters
-    parser.add_argument('-d', '--data', help='dataset root path', default='../data/test_Pauli')
-    parser.add_argument('--load-ckpt', help='load model checkpoint', default='../ckpts/gamma-l2-5-20-0.0001-50epoch/n2n-gamma.pt')
+    parser.add_argument('-d', '--data', help='dataset root path', default='../data/SAR')
+    parser.add_argument('--load-ckpt', help='load model checkpoint', default='../ckpts/SAR/n2n-SAR.pt')
     parser.add_argument('--show-output', help='pop up window to display outputs', default=2, type=int)
     parser.add_argument('--cuda', help='use cuda', action='store_true', default=True)
 
