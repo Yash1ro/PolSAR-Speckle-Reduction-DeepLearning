@@ -6,7 +6,6 @@ import torch.nn as nn
 
 
 class UNet(nn.Module):
-    """Custom U-Net architecture for Noise2Noise (see Appendix, Table 2)."""
 
     def __init__(self, in_channels=3, out_channels=3):
         """Initializes U-Net."""
@@ -66,7 +65,6 @@ class UNet(nn.Module):
 
 
     def _init_weights(self):
-        """Initializes weights using He et al. (2015)."""
 
         for m in self.modules():
             if isinstance(m, nn.ConvTranspose2d) or isinstance(m, nn.Conv2d):

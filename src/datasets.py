@@ -45,7 +45,7 @@ def load_dataset(root_dir, redux, params, shuffled=False, single=False):
 
 
 class AbstractDataset(Dataset):
-    """Abstract dataset class for Noise2Noise."""
+    """Abstract dataset class."""
 
     def __init__(self, root_dir, redux=0, crop_size=128, clean_targets=False):
         """Initializes abstract dataset."""
@@ -62,7 +62,6 @@ class AbstractDataset(Dataset):
 
     def _random_crop(self, img_list):
         """Performs random square crop of fixed size.
-        Works with list so that all items get the same cropped window (e.g. for buffers).
         """
 
         w, h = img_list[0].size
@@ -89,7 +88,7 @@ class AbstractDataset(Dataset):
 
     def __len__(self):
         """Returns length of dataset."""
-        return len(self.imgs)
+        return len(self.imgs_source)
 
 
 class NoisyDataset(AbstractDataset):
@@ -221,7 +220,7 @@ class NoisyDataset(AbstractDataset):
         return text_img
 
     def _corrupt(self, img):
-        """Corrupts images (Gaussian, Poisson, or text overlay)."""
+        """Corrupts images"""
 
         if self.noise_type in ['gaussian', 'poisson', 'speckle', 'gamma-l1', 'sp', 'gamma-L', 'gamma-l2']:
             return self._add_noise(img)

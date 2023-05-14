@@ -63,7 +63,7 @@ def show_on_report(batch_idx, num_batches, loss, elapsed):
 
 
 def plot_per_epoch(ckpt_dir, title, measurements, y_label):
-    """Plots stats (train/valid loss, avg PSNR, etc.)."""
+    """Plots stats"""
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -101,7 +101,7 @@ def load_hdr_as_tensor(img_path):
 
 
 def reinhard_tonemap(tensor):
-    """Reinhard et al. (2002) tone mapping."""
+    """Reinhard tone mapping."""
 
     tensor[tensor < 0] = 0
     return torch.pow(tensor / (1 + tensor), 1 / 2.2)

@@ -14,7 +14,6 @@ import json
 import myLogs
 
 class Noise2Noise(object):
-    """Implementation of Noise2Noise from Lehtinen et al. (2018)."""
 
     def __init__(self, params, trainable):
         """Initializes model."""
@@ -25,7 +24,7 @@ class Noise2Noise(object):
 
 
     def _compile(self):
-        """Compiles model (architecture, loss function, optimizers, etc.)."""
+        """Compiles model"""
 
         print('Lewis-Gu-S2S')
 
