@@ -89,7 +89,7 @@ class AbstractDataset(Dataset):
 
     def __len__(self):
         """Returns length of dataset."""
-        return len(self.imgs_source)
+        return len(self.imgs)
 
 
 class NoisyDataset(AbstractDataset):
